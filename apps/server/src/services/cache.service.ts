@@ -19,4 +19,20 @@ export class CacheService {
         const key = `${this.PREFIX}user:${userId}`;
         await redis.del(key);
     }
+
+    static async getUserSubscriptions(userId: string) {
+        const key = `${this.PREFIX}subscriptions:${userId}`;
+        const cached = await redis.get(key);
+        return cached ? JSON.parse(cached) : null;
+    }
+
+    static async setUserSubscriptions(userId: string, subscriptions: any) {
+        const key = `${this.PREFIX}subscriptions:${userId}`;
+        await redis.setex(key, this.TTL, JSON.stringify(subscriptions));
+    }
+
+    static async invalidateUserSubscriptions(userId: string) {
+        const key = `${this.PREFIX}subscriptions:${userId}`;
+        await redis.del(key);
+    }
 } 
