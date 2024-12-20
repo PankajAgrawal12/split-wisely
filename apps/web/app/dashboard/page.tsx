@@ -6,10 +6,13 @@ const Dashboard = () => {
   const { user } = useUser();
 
   return (
-    <>
-      <p>Dashboard</p>
-      <h1>Hey </h1>
-    </>
+    <div>
+      <h1>Welcome, {user?.firstName}</h1>
+      <ul>
+        <li>Show upcoming payments</li>
+        <li>Show active groups</li>
+      </ul>
+    </div>
   );
 };
 

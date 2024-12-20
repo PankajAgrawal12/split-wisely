@@ -86,7 +86,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">{children}</div>
+      <div className="flex-1 p-8 overflow-scroll">{children}</div>
     </div>
   );
 };
