@@ -75,7 +75,29 @@ const dummy_data = [
 const Subscriptions = () => {
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Your Subscriptions</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Your Subscriptions</h1>
+        <button
+          onClick={() => console.log("Create new subscription")}
+          className="btn btn-primary gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          New Subscription
+        </button>
+      </div>
       <div className="grid grid-cols-2 mdmax:grid-cols-1 gap-6">
         {dummy_data.map((subscription) => (
           <SubscriptionCard
