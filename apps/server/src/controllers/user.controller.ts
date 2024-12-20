@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { config } from "../config/env";
 import type { SignupInput, LoginInput, UpdateProfileInput } from "@split-wisely/validations";
+import { CacheService } from "../services/cache.service";
 
 export class UserController {
     static async signup(req: Request<{}, {}, SignupInput>, res: Response) {
@@ -49,13 +50,20 @@ export class UserController {
                 return res.status(401).json({ message: "Invalid credentials" });
             }
 
-            await prisma.user.update({
+            const updatedUser = await prisma.user.update({
                 where: { id: user.id },
                 data: { lastLogin: new Date() }
             });
 
-            const token = jwt.sign({ userId: user.id }, config.JWT_SECRET);
+            await CacheService.setUserProfile(user.id, {
+                id: updatedUser.id,
+                email: updatedUser.email,
+                name: updatedUser.name,
+                role: updatedUser.role,
+                lastLogin: updatedUser.lastLogin
+            });
 
+            const token = jwt.sign({ userId: user.id }, config.JWT_SECRET);
             return res.status(200).json({ token });
         } catch (error) {
             return res.status(500).json({ message: "Internal server error" });
@@ -64,6 +72,11 @@ export class UserController {
 
     static async getProfile(req: Request, res: Response) {
         try {
+            const cached = await CacheService.getUserProfile(req.user.id);
+            if (cached) {
+                return res.status(200).json(cached);
+            }
+
             const user = await prisma.user.findUnique({
                 where: { id: req.user.id },
                 select: {
@@ -76,6 +89,7 @@ export class UserController {
                 }
             });
 
+            await CacheService.setUserProfile(req.user.id, user);
             return res.status(200).json(user);
         } catch (error) {
             return res.status(500).json({ message: "Internal server error" });
@@ -88,7 +102,6 @@ export class UserController {
     ) {
         try {
             const updates: any = { ...req.body };
-
             if (updates.password) {
                 updates.password = await bcrypt.hash(updates.password, 10);
             }
@@ -105,6 +118,7 @@ export class UserController {
                 }
             });
 
+            await CacheService.invalidateUserProfile(req.user.id);
             return res.status(200).json(user);
         } catch (error) {
             return res.status(500).json({ message: "Internal server error" });
