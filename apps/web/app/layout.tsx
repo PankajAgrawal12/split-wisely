@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import {ClerkProvider} from "@clerk/nextjs"
+import { ClerkProvider } from "@clerk/nextjs";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -14,8 +14,10 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Splitwisely - Easily Split Expenses with Friends",
-  description: "Splitwisely helps you split bills, track expenses, and settle debts with friends and roommates. Simple, fast, and hassle-free expense sharing.",
-  keywords: "expense splitting, bill sharing, roommate expenses, group expenses, money management, split bills",
+  description:
+    "Splitwisely helps you split bills, track expenses, and settle debts with friends and roommates. Simple, fast, and hassle-free expense sharing.",
+  keywords:
+    "expense splitting, bill sharing, roommate expenses, group expenses, money management, split bills",
   authors: [{ name: "Splitwisely" }],
   openGraph: {
     title: "Splitwisely - Easily Split Expenses with Friends",
@@ -44,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" data-theme="light">
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
           {children}
         </body>

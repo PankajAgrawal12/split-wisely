@@ -2,7 +2,7 @@
 
 import { SubscriptionCard } from "../../components/SubscriptionCard";
 
-const dummy_data = [
+export const dummy_data = [
   {
     id: "507f1f77bcf86cd799439011",
     name: "Netflix Premium",
@@ -74,16 +74,21 @@ const dummy_data = [
 
 const Subscriptions = () => {
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Your Subscriptions</h1>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">Active Subscriptions</h2>
+          <p className="text-base-content/70">
+            Manage and track your shared subscriptions
+          </p>
+        </div>
         <button
           onClick={() => console.log("Create new subscription")}
-          className="btn btn-primary gap-2"
+          className="btn btn-primary gap-2 hover:shadow-lg transition-all"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-5 w-5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -98,14 +103,51 @@ const Subscriptions = () => {
           New Subscription
         </button>
       </div>
-      <div className="grid grid-cols-2 mdmax:grid-cols-1 gap-6">
+
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="stat bg-base-100 rounded-xl shadow-md hover:shadow-lg transition-all p-6">
+          <div className="stat-title text-base-content/70">Total Active</div>
+          <div className="stat-value mt-2">{dummy_data.length}</div>
+          <div className="stat-desc mt-1">Subscriptions</div>
+        </div>
+        <div className="stat bg-base-100 rounded-xl shadow-md hover:shadow-lg transition-all p-6">
+          <div className="stat-title text-base-content/70">Monthly Spend</div>
+          <div className="stat-value text-primary mt-2">
+            ₹
+            {dummy_data
+              .reduce(
+                (acc, curr) =>
+                  acc +
+                  (curr.billingCycle === "MONTHLY"
+                    ? curr.amount
+                    : curr.amount / 12),
+                0,
+              )
+              .toFixed(2)}
+          </div>
+          <div className="stat-desc mt-1">Average per month</div>
+        </div>
+        <div className="stat bg-base-100 rounded-xl shadow-md hover:shadow-lg transition-all p-6">
+          <div className="stat-title text-base-content/70">Next Payment</div>
+          <div className="stat-value text-secondary mt-2">₹849</div>
+          <div className="stat-desc mt-1">Due in 5 days</div>
+        </div>
+      </div>
+
+      {/* Subscription Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {dummy_data.map((subscription) => (
           <SubscriptionCard
             key={subscription.id}
             subscription={subscription}
             currentUserId="user_01" // Replace with actual user ID
-            onPay={() => console.log("Pay button clicked")}
-            onEnableAutoPay={() => console.log("Auto pay button clicked")}
+            onPay={() =>
+              console.log("Pay button clicked for:", subscription.id)
+            }
+            onEnableAutoPay={() =>
+              console.log("Auto pay button clicked for:", subscription.id)
+            }
           />
         ))}
       </div>
