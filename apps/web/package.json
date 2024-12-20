@@ -11,6 +11,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.9.5",
     "@repo/ui": "*",
     "next": "^15.1.0",
     "react": "^19.0.0",
