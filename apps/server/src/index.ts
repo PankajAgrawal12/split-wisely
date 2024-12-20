@@ -1,20 +1,29 @@
-import http from "http";
+import express from "express";
+import cors from "cors";
 import { redis } from "./config/redis";
 import { config } from "./config/env";
 import { prisma } from "./config/prisma";
+import userRoutes from "./routes/user.routes";
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use("/users", userRoutes);
 
 async function init() {
     try {
         // Test Redis connection
         await redis.ping();
-        
+
         // Connect to Prisma
         await prisma.$connect();
         console.log("🚀 Connected to Database");
 
-        const httpServer = http.createServer();
-
-        httpServer.listen(config.PORT, () =>
+        app.listen(config.PORT, () =>
             console.log(`🚀 HTTP Server started at PORT: ${config.PORT}`)
         );
     } catch (error) {
@@ -33,7 +42,6 @@ process.on('beforeExit', async () => {
     await redis.quit();
 });
 
-// Handle other termination signals
 ['SIGINT', 'SIGTERM'].forEach(signal => {
     process.on(signal, async () => {
         await prisma.$disconnect();
