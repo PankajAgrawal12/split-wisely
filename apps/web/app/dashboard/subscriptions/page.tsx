@@ -1,3 +1,5 @@
+"use client";
+
 import { SubscriptionCard } from "../../components/SubscriptionCard";
 
 const dummy_data = [
@@ -74,12 +76,14 @@ const Subscriptions = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Your Subscriptions</h1>
-      <div className="grid grid-cols-3 lgmax:grid-cols-2 mdmax:grid-cols-1 gap-6">
+      <div className="grid grid-cols-2 mdmax:grid-cols-1 gap-6">
         {dummy_data.map((subscription) => (
           <SubscriptionCard
             key={subscription.id}
             subscription={subscription}
             currentUserId="user_01" // Replace with actual user ID
+            onPay={() => console.log("Pay button clicked")}
+            onEnableAutoPay={() => console.log("Auto pay button clicked")}
           />
         ))}
       </div>
