@@ -38,6 +38,7 @@ model User {
     clerkId      String         @unique
     email        String         @unique
     name         String
+    phone        String?
     role         String         @default("user")
     isActive     Boolean        @default(true)
     createdAt    DateTime       @default(now())
@@ -47,6 +48,11 @@ model User {
     Participant  Participant[]
     Payment      Payment[]
     Notification Notification[]
+    payerSubscriptions    Subscription[] @relation("PayerSubscriptions")
+    subscriptionMembers   SubscriptionMember[]
+    payerSettlements     Settlement[]   @relation("PayerSettlements")
+    settlerSettlements   Settlement[]   @relation("SettlerSettlements")
+    bankAccounts         BankAccount[]
 }
 
 model Subscription {
@@ -67,6 +73,11 @@ model Subscription {
     isActive        Boolean       @default(true)
     reminderEnabled Boolean       @default(true)
     currency        String        @default("USD")
+    autoRenew       Boolean       @default(false)
+    payerId         String?       @db.ObjectId
+    payer             User?         @relation("PayerSubscriptions", fields: [payerId], references: [id])
+    members         SubscriptionMember[]
+    settlements     Settlement[]
 }
 
 model Participant {
@@ -108,4 +119,52 @@ model Notification {
     createdAt DateTime         @default(now())
     readAt    DateTime?
     User      User             @relation(fields: [userId], references: [id])
+}
+
+model Settlement {
+    id              String   @id @default(cuid()) @map("_id")
+    subscriptionId  String   @db.ObjectId
+    subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+    payerId         String   @db.ObjectId
+    payerUser       User     @relation("PayerSettlements", fields: [payerId], references: [id])
+    settlerId       String   @db.ObjectId
+    settlerUser     User     @relation("SettlerSettlements", fields: [settlerId], references: [id])
+    amount          Float
+    status          SettlementStatus @default(PENDING)
+    paymentLinkId   String?    // Razorpay payment link ID
+    paymentId       String?    // Razorpay payment ID
+    beneficiaryId   String?    // RazorpayX beneficiary ID
+    fundAccountId   String?    // RazorpayX fund account ID
+    payoutId        String?    // RazorpayX payout ID
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+}
+
+enum SettlementStatus {
+    PENDING
+    PAYMENT_LINK_CREATED
+    PAID
+    SETTLED
+    FAILED
+}
+
+model BankAccount {
+    id            String   @id @default(cuid()) @map("_id")
+    userId        String   @db.ObjectId
+    user          User     @relation(fields: [userId], references: [id])
+    accountNumber String
+    ifscCode      String
+    accountName   String
+    isDefault     Boolean  @default(false)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+}
+
+model SubscriptionMember {
+    id              String       @id @default(auto()) @map("_id") @db.ObjectId
+    subscriptionId  String       @db.ObjectId
+    userId          String       @db.ObjectId
+    subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+    user            User         @relation(fields: [userId], references: [id])
+    createdAt       DateTime     @default(now())
 }
