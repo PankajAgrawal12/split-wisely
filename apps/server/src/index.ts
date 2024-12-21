@@ -5,6 +5,7 @@ import { config } from "./config/env";
 import { prisma } from "./config/prisma";
 import userRoutes from "./routes/user.routes";
 import subscriptionRoutes from "./routes/subscription.routes";
+import settlementRoutes from './routes/settlement.routes';
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 // Routes
 app.use("/users", userRoutes);
 app.use("/subscriptions", subscriptionRoutes);
+app.use('/api', settlementRoutes);
 
 async function init() {
     try {
