@@ -3,7 +3,6 @@ import cors from "cors";
 import { redis } from "./config/redis";
 import { config } from "./config/env";
 import { prisma } from "./config/prisma";
-import { requireAuth } from "@clerk/express";
 import userRoutes from "./routes/user.routes";
 import subscriptionRoutes from "./routes/subscription.routes";
 
@@ -12,7 +11,6 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(requireAuth());
 
 // Routes
 app.use("/users", userRoutes);

@@ -4,10 +4,10 @@ import { requireAuth } from "@clerk/express";
 
 const router = Router();
 
-// Public webhook endpoint
+// Public webhook endpoint (no auth required)
 router.post("/webhook", UserController.webhookHandler);
 
-// Protected routes (require authentication)
+// Protected routes
 router.get("/me", requireAuth(), UserController.getProfile);
 router.put("/profile", requireAuth(), UserController.updateProfile);
 router.delete("/account", requireAuth(), UserController.deleteAccount);
