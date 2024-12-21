@@ -8,10 +8,30 @@ import { BiGroup } from "react-icons/bi";
 import { dummy_data } from "./subscriptions/page";
 import { useState } from "react";
 import NewSubscriptionModal from "../components/NewSubscriptionModal";
+import { useQuery } from "@tanstack/react-query";
+import { BACKEND_URL } from "../data";
 
 const DashboardPage = () => {
   const { user } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fetch the /me endpoint to get the user's profile
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      const response = await fetch(BACKEND_URL);
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile");
+      }
+      return response.json();
+    },
+  });
+
+  console.log(profile);
+
+  // 1. Fetch current user's subscriptions
+  // 2. Fetch user's profile (if needed)
+  // 3. Fetch user's notifications
 
   const quickStats = [
     {
