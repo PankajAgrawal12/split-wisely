@@ -82,19 +82,22 @@ model Participant {
 }
 
 model Payment {
-    id             String        @id @default(auto()) @map("_id") @db.ObjectId
-    subscriptionId String        @db.ObjectId
-    userId         String        @db.ObjectId
-    amount         Float
-    dueDate        DateTime
-    status         PaymentStatus @default(PENDING)
-    Subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
-    User           User          @relation(fields: [userId], references: [id])
-    paidAt         DateTime?
-    description    String?
-    paymentMethod  String? // e.g., "CARD", "BANK_TRANSFER", "CASH"
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+    id                  String        @id @default(auto()) @map("_id") @db.ObjectId
+    subscriptionId      String        @db.ObjectId
+    userId              String        @db.ObjectId
+    amount              Float
+    dueDate             DateTime
+    status              PaymentStatus  @default(PENDING)
+    Subscription        Subscription   @relation(fields: [subscriptionId], references: [id])
+    User                User           @relation(fields: [userId], references: [id])
+    paidAt              DateTime?
+    description         String?
+    paymentMethod       String?       // e.g., "CARD", "BANK_TRANSFER", "CASH"
+    createdAt           DateTime      @default(now())
+    updatedAt           DateTime      @updatedAt
+    razorpayPaymentId   String?
+    razorpayOrderId     String?
+    failureReason       String?
 }
 
 model Notification {
