@@ -34,19 +34,19 @@ enum NotificationType {
 }
 
 model User {
-    id            String         @id @default(auto()) @map("_id") @db.ObjectId
-    email         String         @unique
-    password      String
-    name          String
-    role          UserRole       @default(USER)
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
-    subscriptions Subscription[] // User's owned subscriptions
-    participantOf Participant[] // Subscriptions this user is part of
-    payments      Payment[] // Payments made by the user
-    notifications Notification[]
-    isActive      Boolean        @default(true)
-    lastLogin     DateTime?
+    id           String         @id @default(auto()) @map("_id") @db.ObjectId
+    clerkId      String         @unique
+    email        String         @unique
+    name         String
+    role         String         @default("user")
+    isActive     Boolean        @default(true)
+    createdAt    DateTime       @default(now())
+    updatedAt    DateTime       @updatedAt
+    lastLogin    DateTime?
+    Subscription Subscription[]
+    Participant  Participant[]
+    Payment      Payment[]
+    Notification Notification[]
 }
 
 model Subscription {
@@ -82,22 +82,22 @@ model Participant {
 }
 
 model Payment {
-    id                  String        @id @default(auto()) @map("_id") @db.ObjectId
-    subscriptionId      String        @db.ObjectId
-    userId              String        @db.ObjectId
-    amount              Float
-    dueDate             DateTime
-    status              PaymentStatus  @default(PENDING)
-    Subscription        Subscription   @relation(fields: [subscriptionId], references: [id])
-    User                User           @relation(fields: [userId], references: [id])
-    paidAt              DateTime?
-    description         String?
-    paymentMethod       String?       // e.g., "CARD", "BANK_TRANSFER", "CASH"
-    createdAt           DateTime      @default(now())
-    updatedAt           DateTime      @updatedAt
-    razorpayPaymentId   String?
-    razorpayOrderId     String?
-    failureReason       String?
+    id                String        @id @default(auto()) @map("_id") @db.ObjectId
+    subscriptionId    String        @db.ObjectId
+    userId            String        @db.ObjectId
+    amount            Float
+    dueDate           DateTime
+    status            PaymentStatus @default(PENDING)
+    Subscription      Subscription  @relation(fields: [subscriptionId], references: [id])
+    User              User          @relation(fields: [userId], references: [id])
+    paidAt            DateTime?
+    description       String?
+    paymentMethod     String? // e.g., "CARD", "BANK_TRANSFER", "CASH"
+    createdAt         DateTime      @default(now())
+    updatedAt         DateTime      @updatedAt
+    razorpayPaymentId String?
+    razorpayOrderId   String?
+    failureReason     String?
 }
 
 model Notification {
