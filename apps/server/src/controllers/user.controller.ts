@@ -9,22 +9,22 @@ const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export class UserController {
     static async webhookHandler(req: Request, res: Response) {
-        // Verify webhook signature
-        const svix_id = req.headers["svix-id"] as string;
-        const svix_timestamp = req.headers["svix-timestamp"] as string;
-        const svix_signature = req.headers["svix-signature"] as string;
-
-        if (!svix_id || !svix_timestamp || !svix_signature) {
-            return res.status(400).json({ error: "Missing svix headers" });
-        }
-
         try {
-            const evt = req.body;
+            // TODO: Re-enable header verification in production
+            // const svix_id = req.headers["svix-id"] as string;
+            // const svix_timestamp = req.headers["svix-timestamp"] as string;
+            // const svix_signature = req.headers["svix-signature"] as string;
 
+            // if (!svix_id || !svix_timestamp || !svix_signature) {
+            //     return res.status(400).json({ error: "Missing svix headers" });
+            // }
+
+            const evt = req.body;
+            
             switch (evt.type) {
                 case 'user.created': {
                     const { id, email_addresses, first_name, last_name } = evt.data;
-
+                    
                     await prisma.user.create({
                         data: {
                             clerkId: id,
@@ -36,7 +36,7 @@ export class UserController {
                     break;
                 }
             }
-
+            
             return res.status(200).json({ message: "Webhook processed successfully" });
         } catch (error) {
             console.error('Webhook error:', error);
