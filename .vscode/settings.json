@@ -1,0 +1,31 @@
+{
+  "files.insertFinalNewline": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll": "explicit",
+    "source.removeUnusedImports": "always"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "prettier.singleQuote": true,
+  "prettier.jsxSingleQuote": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "workbench.editor.enablePreview": true,
+  "editor.suggestSelection": "first",
+  "editor.tokenColorCustomizations": {
+    "textMateRules": []
+  },
+  "editor.rulers": [80],
+  "files.associations": {
+    "*.scss": "postcss",
+    "*.css": "tailwindcss"
+  },
+  "files.autoSave": "onFocusChange",
+  "editor.tabSize": 2,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/build": true
+  }
+}

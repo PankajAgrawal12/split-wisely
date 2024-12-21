@@ -16,38 +16,46 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/subscriptions", subscriptionRoutes);
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Welcome to Split-Wisely API",
+    status: "healthy",
+  });
+});
+
 async function init() {
-    try {
-        // Test Redis connection
-        await redis.ping();
+  try {
+    // Test Redis connection
+    await redis.ping();
 
-        // Connect to Prisma
-        await prisma.$connect();
-        console.log("🚀 Connected to Database");
+    // Connect to Prisma
+    await prisma.$connect();
+    console.log("🚀 Connected to Database");
 
-        app.listen(config.PORT, () =>
-            console.log(`🚀 HTTP Server started at PORT: ${config.PORT}`)
-        );
-    } catch (error) {
-        console.error("Failed to start server:", error);
-        await prisma.$disconnect();
-        redis.disconnect();
-        process.exit(1);
-    }
+    app.listen(config.PORT, () =>
+      console.log(`🚀 HTTP Server started at PORT: ${config.PORT}`),
+    );
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    await prisma.$disconnect();
+    redis.disconnect();
+    process.exit(1);
+  }
 }
 
 init();
 
 // Handle graceful shutdown
-process.on('beforeExit', async () => {
-    await prisma.$disconnect();
-    await redis.quit();
+process.on("beforeExit", async () => {
+  await prisma.$disconnect();
+  await redis.quit();
 });
 
-['SIGINT', 'SIGTERM'].forEach(signal => {
-    process.on(signal, async () => {
-        await prisma.$disconnect();
-        await redis.quit();
-        process.exit(0);
-    });
+["SIGINT", "SIGTERM"].forEach((signal) => {
+  process.on(signal, async () => {
+    await prisma.$disconnect();
+    await redis.quit();
+    process.exit(0);
+  });
 });
