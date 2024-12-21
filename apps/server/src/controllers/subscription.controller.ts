@@ -193,7 +193,7 @@ export class SubscriptionController {
             });
 
             const participants = await prisma.$transaction(
-                users.map(user =>
+                users.map((user: { id: string }) =>
                     prisma.participant.create({
                         data: {
                             subscriptionId: id,
