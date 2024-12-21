@@ -1,14 +1,17 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { HiHome } from "react-icons/hi";
 import { RiMoneyDollarCircleFill } from "react-icons/ri";
 import { BiGroup } from "react-icons/bi";
 import { dummy_data } from "./subscriptions/page";
+import { useState } from "react";
+import NewSubscriptionModal from "../components/NewSubscriptionModal";
 
 const DashboardPage = () => {
   const { user } = useUser();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const quickStats = [
     {
@@ -37,13 +40,25 @@ const DashboardPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Welcome Section */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">
-          Welcome back, {user?.firstName}! 👋
-        </h1>
-        <p className="text-base-content/70">
-          Here's what's happening with your subscriptions
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">
+            Welcome back, {user?.firstName}! 👋
+          </h1>
+          <p className="text-base-content/70">
+            Here's what's happening with your subscriptions
+          </p>
+        </div>
+        <div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "size-10",
+              },
+            }}
+          />
+        </div>
       </div>
 
       {/* Quick Stats */}
@@ -89,7 +104,12 @@ const DashboardPage = () => {
             <h3 className="card-title">Add New Subscription</h3>
             <p>Start tracking a new subscription with friends</p>
             <div className="card-actions justify-end">
-              <button className="btn btn-ghost">Create →</button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Create →
+              </button>
             </div>
           </div>
         </div>
@@ -130,6 +150,13 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+      {isModalOpen && (
+        <NewSubscriptionModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+        />
+      )}
     </div>
   );
 };

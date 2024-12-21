@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { SubscriptionCard } from "../../components/SubscriptionCard";
+import NewSubscriptionModal from "../../components/NewSubscriptionModal";
+import Link from "next/link";
 
 export const dummy_data = [
   {
@@ -73,17 +76,35 @@ export const dummy_data = [
 ];
 
 const Subscriptions = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Active Subscriptions</h2>
-          <p className="text-base-content/70">
-            Manage and track your shared subscriptions
-          </p>
-        </div>
+        <Link href="/dashboard" className="flex items-center gap-2 mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 aspect-square hover:scale-110 transition-all"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          <div>
+            <h2 className="text-3xl font-bold mb-2">Active Subscriptions</h2>
+            <p className="text-base-content/70">
+              Manage and track your shared subscriptions
+            </p>
+          </div>
+        </Link>
         <button
-          onClick={() => console.log("Create new subscription")}
+          onClick={() => setIsModalOpen(true)}
           className="btn btn-primary gap-2 hover:shadow-lg transition-all"
         >
           <svg
@@ -151,6 +172,13 @@ const Subscriptions = () => {
           />
         ))}
       </div>
+
+      {isModalOpen && (
+        <NewSubscriptionModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+        />
+      )}
     </div>
   );
 };
