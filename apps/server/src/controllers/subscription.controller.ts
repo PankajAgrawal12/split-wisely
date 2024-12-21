@@ -14,7 +14,8 @@ export class SubscriptionController {
             const subscription = await prisma.subscription.create({
                 data: {
                     ...req.body,
-                    ownerId: req.user.id
+                    ownerId: req.user.id,
+                    payerId: req.user.id
                 }
             });
 
