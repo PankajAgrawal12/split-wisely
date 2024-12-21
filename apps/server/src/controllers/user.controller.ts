@@ -1,84 +1,59 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { config } from "../config/env";
-import type { SignupInput, LoginInput, UpdateProfileInput } from "@split-wisely/validations";
+import type { UpdateProfileInput } from "@split-wisely/validations";
 import { CacheService } from "../services/cache.service";
+// import { Clerk } from "@clerk/backend";
+import { createClerkClient } from "@clerk/backend";
+
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 export class UserController {
-    static async signup(req: Request<{}, {}, SignupInput>, res: Response) {
-        try {
-            const { email, password, name } = req.body;
+    static async webhookHandler(req: Request, res: Response) {
+        // Verify webhook signature
+        const svix_id = req.headers["svix-id"] as string;
+        const svix_timestamp = req.headers["svix-timestamp"] as string;
+        const svix_signature = req.headers["svix-signature"] as string;
 
-            const existingUser = await prisma.user.findUnique({ where: { email } });
-            if (existingUser) {
-                return res.status(400).json({ message: "Email already registered" });
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const user = await prisma.user.create({
-                data: {
-                    email,
-                    password: hashedPassword,
-                    name
-                }
-            });
-
-            const token = jwt.sign({ userId: user.id }, config.JWT_SECRET);
-
-            return res.status(201).json({
-                message: "User created successfully",
-                token
-            });
-        } catch (error) {
-            return res.status(500).json({ message: "Internal server error" });
+        if (!svix_id || !svix_timestamp || !svix_signature) {
+            return res.status(400).json({ error: "Missing svix headers" });
         }
-    }
 
-    static async login(req: Request<{}, {}, LoginInput>, res: Response) {
         try {
-            const { email, password } = req.body;
+            const evt = req.body;
 
-            const user = await prisma.user.findUnique({ where: { email } });
-            if (!user || !user.isActive) {
-                return res.status(401).json({ message: "Invalid credentials" });
+            switch (evt.type) {
+                case 'user.created': {
+                    const { id, email_addresses, first_name, last_name } = evt.data;
+
+                    await prisma.user.create({
+                        data: {
+                            clerkId: id,
+                            email: email_addresses[0].email_address,
+                            name: `${first_name || ''} ${last_name || ''}`.trim(),
+                            isActive: true
+                        }
+                    });
+                    break;
+                }
             }
 
-            const isValidPassword = await bcrypt.compare(password, user.password);
-            if (!isValidPassword) {
-                return res.status(401).json({ message: "Invalid credentials" });
-            }
-
-            const updatedUser = await prisma.user.update({
-                where: { id: user.id },
-                data: { lastLogin: new Date() }
-            });
-
-            await CacheService.setUserProfile(user.id, {
-                id: updatedUser.id,
-                email: updatedUser.email,
-                name: updatedUser.name,
-                role: updatedUser.role,
-                lastLogin: updatedUser.lastLogin
-            });
-
-            const token = jwt.sign({ userId: user.id }, config.JWT_SECRET);
-            return res.status(200).json({ token });
+            return res.status(200).json({ message: "Webhook processed successfully" });
         } catch (error) {
-            return res.status(500).json({ message: "Internal server error" });
+            console.error('Webhook error:', error);
+            return res.status(500).json({ error: "Webhook processing failed" });
         }
     }
 
     static async getProfile(req: Request, res: Response) {
         try {
-            const cached = await CacheService.getUserProfile(req.user.id);
+            const { userId } = req.auth;
+            const cached = await CacheService.getUserProfile(userId);
             if (cached) {
                 return res.status(200).json(cached);
             }
 
             const user = await prisma.user.findUnique({
-                where: { id: req.user.id },
+                where: { clerkId: userId },
                 select: {
                     id: true,
                     email: true,
@@ -89,26 +64,25 @@ export class UserController {
                 }
             });
 
-            await CacheService.setUserProfile(req.user.id, user);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            await CacheService.setUserProfile(user.id, user);
             return res.status(200).json(user);
         } catch (error) {
             return res.status(500).json({ message: "Internal server error" });
         }
     }
 
-    static async updateProfile(
-        req: Request<{}, {}, UpdateProfileInput>,
-        res: Response
-    ) {
+    static async updateProfile(req: Request, res: Response) {
         try {
-            const updates: any = { ...req.body };
-            if (updates.password) {
-                updates.password = await bcrypt.hash(updates.password, 10);
-            }
-
+            const { userId } = req.auth;
             const user = await prisma.user.update({
-                where: { id: req.user.id },
-                data: updates,
+                where: { clerkId: userId },
+                data: {
+                    name: req.body.name,
+                },
                 select: {
                     id: true,
                     email: true,
@@ -118,7 +92,7 @@ export class UserController {
                 }
             });
 
-            await CacheService.invalidateUserProfile(req.user.id);
+            await CacheService.invalidateUserProfile(user.id);
             return res.status(200).json(user);
         } catch (error) {
             return res.status(500).json({ message: "Internal server error" });
@@ -127,8 +101,13 @@ export class UserController {
 
     static async deleteAccount(req: Request, res: Response) {
         try {
+            const { userId } = req.auth;
+            // Delete user from Clerk
+            await clerk.users.deleteUser(userId);
+
+            // Deactivate in our database
             await prisma.user.update({
-                where: { id: req.user.id },
+                where: { clerkId: userId },
                 data: { isActive: false }
             });
 
@@ -137,4 +116,4 @@ export class UserController {
             return res.status(500).json({ message: "Internal server error" });
         }
     }
-} 
+}

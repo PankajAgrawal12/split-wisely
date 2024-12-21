@@ -1,19 +1,15 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller";
-import { validate } from "../middleware/validate";
-import { authenticateUser } from "../middleware/auth";
-import { signupSchema, loginSchema, updateProfileSchema } from "@split-wisely/validations";
+import { requireAuth } from "@clerk/express";
 
 const router = Router();
 
-router.post("/signup", validate(signupSchema), UserController.signup);
-router.post("/login", validate(loginSchema), UserController.login);
-router.get("/me", authenticateUser, UserController.getProfile);
-router.put("/update-profile",
-    authenticateUser,
-    validate(updateProfileSchema),
-    UserController.updateProfile
-);
-router.delete("/delete-account", authenticateUser, UserController.deleteAccount);
+// Public webhook endpoint
+router.post("/webhook", UserController.webhookHandler);
+
+// Protected routes (require authentication)
+router.get("/me", requireAuth(), UserController.getProfile);
+router.put("/profile", requireAuth(), UserController.updateProfile);
+router.delete("/account", requireAuth(), UserController.deleteAccount);
 
 export default router;
